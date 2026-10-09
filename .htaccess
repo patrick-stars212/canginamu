@@ -1,0 +1,106 @@
+##
+# @package    Joomla
+# @copyright  (C) 2005 Open Source Matters, Inc. <https://www.joomla.org>
+# @license    GNU General Public License version 2 or later; see LICENSE.txt
+##
+
+## Can be commented out if causes errors, see notes above.
+Options +FollowSymlinks
+Options -Indexes
+
+## No directory listings
+<IfModule mod_autoindex.c>
+	IndexIgnore *
+</IfModule>
+
+## Suppress mime type detection in browsers for unknown types
+<IfModule mod_headers.c>
+	Header always set X-Content-Type-Options "nosniff"
+</IfModule>
+
+## Disable inline JavaScript when directly opening SVG files or embedding them with the object-tag
+<FilesMatch "\.svg$">
+  <IfModule mod_headers.c>
+    Header always set Content-Security-Policy "script-src 'none'"
+  </IfModule>
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+	RewriteRule ^franchises/?$ /franchise/ [R=301,L]
+	RewriteRule ^jobs/?$ /employment [R=301,L]
+	RewriteRule ^merchandise/?$ /index.php?Itemid=470&option=com_hikashop&view=product&layout=listing [R=301,L,QSA]
+	RewriteRule ^hikashop/?$ /index.php?Itemid=470&option=com_hikashop&view=product&layout=listing [R=302,L,QSA]
+	RewriteRule ^enrol-now/?$ /find-a-venue [R=302,L]
+	RewriteRule ^about/?$ /about-us [R=301,L]
+	RewriteRule ^contact-us/?$ /contact [R=301,L]
+	RewriteRule ^login/?$ /component/users/login [R=302,L]
+	RewriteRule ^adelaidehills/?$ /index.php?option=com_franchisee&view=adelaidehills [L,QSA]
+	RewriteRule ^adelaide-hills/?$ /index.php?option=com_franchisee&view=adelaidehills [L,QSA]
+	RewriteRule ^grasshoppersocceradelaidehills/?$ /index.php?option=com_franchisee&view=adelaidehills [L,QSA]
+	RewriteRule ^pertheast/?$ /index.php?option=com_franchisee&view=pertheast [L,QSA]
+	RewriteRule ^perth-east/?$ /index.php?option=com_franchisee&view=pertheast [L,QSA]
+	RewriteRule ^midcoast/?$ /index.php?option=com_franchisee&view=midcoast [L,QSA]
+	RewriteRule ^northernmelbourne/?$ /index.php?option=com_franchisee&view=northernmelbourne [L,QSA]
+	RewriteRule ^northern-melbourne/?$ /index.php?option=com_franchisee&view=northernmelbourne [L,QSA]
+	RewriteRule ^adelaidenorthwest/?$ /index.php?option=com_franchisee&view=adelaidenorthwest [L,QSA]
+	RewriteRule ^adelaide-northwest/?$ /index.php?option=com_franchisee&view=adelaidenorthwest [L,QSA]
+	RewriteRule ^adelaidenorthwest-1/?$ /index.php?option=com_franchisee&view=adelaidenorthwest [L,QSA]
+	RewriteRule ^canberra/?$ /index.php?option=com_franchisee&view=canberra [L,QSA]
+	RewriteRule ^adelaideinnersouth/?$ /index.php?option=com_franchisee&view=adelaideinnersouth [L,QSA]
+	RewriteRule ^inner-south/?$ /index.php?option=com_franchisee&view=adelaideinnersouth [L,QSA]
+	RewriteRule ^innersouth/?$ /index.php?option=com_franchisee&view=adelaideinnersouth [L,QSA]
+
+	RewriteCond %{QUERY_STRING} base64_encode[^(]*\([^)]*\) [OR]
+	RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
+	RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+	RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
+	RewriteRule .* index.php [F]
+
+	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+	RewriteCond %{REQUEST_URI} ^/api/
+	RewriteCond %{REQUEST_URI} !^/api/index\.php
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule .* api/index.php [L]
+	RewriteCond %{REQUEST_URI} !^/index\.php
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule .* index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+	<IfModule mod_alias.c>
+		RedirectMatch 302 ^/$ /index.php/
+	</IfModule>
+</IfModule>
+
+<IfModule mod_headers.c>
+	RewriteCond "%{HTTP:Accept-encoding}" "gzip"
+	RewriteCond "%{REQUEST_FILENAME}\.gz" -s
+	RewriteRule "^(.*)\.css" "$1\.css\.gz" [QSA]
+
+	RewriteCond "%{HTTP:Accept-encoding}" "gzip"
+	RewriteCond "%{REQUEST_FILENAME}\.gz" -s
+	RewriteRule "^(.*)\.js" "$1\.js\.gz" [QSA]
+
+	RewriteRule "\.css\.gz$" "-" [T=text/css,E=no-gzip:1,E=no-brotli:1]
+	RewriteRule "\.js\.gz$" "-" [T=text/javascript,E=no-gzip:1,E=no-brotli:1]
+
+	<FilesMatch "(\.js\.gz|\.css\.gz)$">
+		Header set Content-Encoding gzip
+		Header append Vary Accept-Encoding
+	</FilesMatch>
+</IfModule>
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php83” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
